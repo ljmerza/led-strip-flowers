@@ -2,7 +2,7 @@
 
 #define LED_PIN     2
 #define NUM_LEDS    55
-#define BRIGHTNESS  255
+#define BRIGHTNESS  255s
 #define LED_TYPE    WS2811
 #define COLOR_ORDER GRB
 CRGB leds[NUM_LEDS];
@@ -11,13 +11,13 @@ int analogInPin = A3;
 int buttonPin = 8;
 
 long lastDebounceTime = 0;  // the last time the output pin was toggled
-long debounceDelay = 500;    // the debounce time; increase if the output flickers
+long debounceDelay = 500;    // the debounce time
 long currentTime = 0;
-int max_delay = 100;
+int max_delay = 100; // max delay for the potentiometer
 
 boolean DEBUG = false;
-int power_delay = 1000;
-int color_index_inc = 3;
+int power_delay = 1000; // power on delay
+int color_index_inc = 3; // hsv increment
 
 int paletteNumber = 0;
 
@@ -26,7 +26,6 @@ TBlendType currentBlending;
 
 extern CRGBPalette16 myRedWhiteBluePalette;
 extern const TProgmemPalette16 myRedWhiteBluePalette_p PROGMEM;
-
 
 void setup() {
     delay( power_delay ); // power-up safety delay
@@ -40,7 +39,6 @@ void setup() {
 
     Serial.begin(9600);
 }
-
 
 void loop()
 {
@@ -73,8 +71,6 @@ void loop()
 
 }
 
-
-
 void FillLEDsFromPaletteColors( uint8_t colorIndex){
     uint8_t brightness = 255;
     
@@ -83,7 +79,6 @@ void FillLEDsFromPaletteColors( uint8_t colorIndex){
         colorIndex += color_index_inc;
     }
 }
-
 
 void ChangePalette(){  
     paletteNumber++;
