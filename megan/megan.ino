@@ -13,6 +13,11 @@ int buttonPin = 8;
 long lastDebounceTime = 0;  // the last time the output pin was toggled
 long debounceDelay = 500;    // the debounce time; increase if the output flickers
 long currentTime = 0;
+int max_delay = 100;
+
+boolean DEBUG = false;
+int power_delay = 1000;
+int color_index_inc = 3;
 
 int paletteNumber = 0;
 
@@ -24,7 +29,7 @@ extern const TProgmemPalette16 myRedWhiteBluePalette_p PROGMEM;
 
 
 void setup() {
-    delay( 3000 ); // power-up safety delay
+    delay( power_delay ); // power-up safety delay
     FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
     FastLED.setBrightness(  BRIGHTNESS );
     
@@ -32,6 +37,8 @@ void setup() {
     currentBlending = LINEARBLEND;
 
     pinMode(buttonPin, INPUT);
+
+    Serial.begin(9600);
 }
 
 
@@ -54,7 +61,15 @@ void loop()
     FillLEDsFromPaletteColors(startIndex);
     
     FastLED.show();
-    FastLED.delay(map(analogRead(analogInPin),0,1023,0,75));
+    
+    int pot = analogRead(analogInPin);
+
+    if(DEBUG) {
+      Serial.print("pot: ");
+      Serial.println(pot);
+    }
+    
+    FastLED.delay(map(pot,0,1023,0,max_delay));
 
 }
 
@@ -65,7 +80,7 @@ void FillLEDsFromPaletteColors( uint8_t colorIndex){
     
     for( int i = 0; i < NUM_LEDS; i++) {
         leds[i] = ColorFromPalette( currentPalette, colorIndex, brightness, currentBlending);
-        colorIndex += 3;
+        colorIndex += color_index_inc;
     }
 }
 
