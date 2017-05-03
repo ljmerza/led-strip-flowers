@@ -29,16 +29,16 @@ IRrecv irrecv(RECV_PIN); // create IR object
 decode_results results; // the results of the IR signal
 /***************** IR controlled variables******************************/
 uint8_t brightness = 128; // LED brightness -> need two to save last brightness before turning off/on
-uint8_t default_speed = 50; // default speed of LEDs
-uint8_t led_speed = led_speed; // hoew long to delay before updating LED colors
-uint8_t max_led_speed = 100; // max speed of LEDs
+uint8_t default_speed = 51; // default speed of LEDs
+uint8_t led_speed = default_speed; // hoew long to delay before updating LED colors
+uint8_t max_led_speed = 99; // max speed of LEDs
 uint16_t current_time = 0; // current time of MCU
 boolean turn_off = true; // do we want to 'turn off' LEDs? (brightness = 0)
 uint8_t start_index = 0; // for color pattern incrementing
 
 uint8_t delay_inc = 5;
 uint8_t bright_inc = 20;
-uint8_t speed_inc = 2;
+uint8_t speed_inc = 3;
 /***************** misc variables******************************/
 uint16_t power_delay = 3000; // power up delay
 /***************** LED variables******************************/
@@ -60,6 +60,7 @@ uint8_t palette_number = 1; // which color palette is being used
 void setup()
 {
     delay(power_delay); // power-up safety delay
+    Serial.begin(9600);
 
     pinMode(BUTTON_PIN, INPUT); // reset button
 
@@ -84,10 +85,12 @@ void setup()
 void loop() { 
 
     // make sure led_speed is in range
-    if(led_speed > max_led_speed) { led_speed = max_led_speed; }
+    if(led_speed > max_led_speed) { led_speed = 3; }
+    if(led_speed < 1) { led_speed = max_led_speed; }
 
     // read from IR if data is there
     read_reciever();
+
 
     current_time = millis();
     // if led_speed has passed and IR is idle then update LEDs
@@ -195,7 +198,7 @@ void read_reciever() {
             led_speed = default_speed;
             break;
           case C:
-            led_speed += delay_inc;
+            led_speed += speed_inc;
             break;
           case UP:
             brightness += bright_inc;
