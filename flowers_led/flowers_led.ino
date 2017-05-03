@@ -38,7 +38,7 @@ uint8_t start_index = 0; // for color pattern incrementing
 
 uint8_t delay_inc = 5;
 uint8_t bright_inc = 20;
-uint8_t speed_inc = 5;
+uint8_t speed_inc = 2;
 /***************** misc variables******************************/
 uint16_t power_delay = 3000; // power up delay
 /***************** LED variables******************************/
@@ -199,9 +199,11 @@ void read_reciever() {
             break;
           case UP:
             brightness += bright_inc;
+            actual_brightness = brightness;
             break;
           case DOWN:
             brightness -= bright_inc;
+            actual_brightness = brightness;
             break;
           case LEFT:
             palette_number--;
