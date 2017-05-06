@@ -1,16 +1,42 @@
-#define FASTLED_ALLOW_INTERRUPTS 0
-#define FASTLED_INTERRUPT_RETRY_COUNT 3
-
 #include <IRremote.h>
+#include <IRremoteInt.h>
+
+#include <bitswap.h>
+#include <chipsets.h>
+#include <color.h>
+#include <colorpalettes.h>
+#include <colorutils.h>
+#include <controller.h>
+#include <cpp_compat.h>
+#include <dmx.h>
 #include <FastLED.h>
+#include <fastled_config.h>
+#include <fastled_delay.h>
+#include <fastled_progmem.h>
+#include <fastpin.h>
+#include <fastspi.h>
+#include <fastspi_bitbang.h>
+#include <fastspi_dma.h>
+#include <fastspi_nop.h>
+#include <fastspi_ref.h>
+#include <fastspi_types.h>
+#include <hsv2rgb.h>
+#include <led_sysdefs.h>
+#include <lib8tion.h>
+#include <noise.h>
+#include <pixelset.h>
+#include <pixeltypes.h>
+#include <platforms.h>
+#include <power_mgt.h>
+
 
 /********************************** pin variables ***********************************************/
-#define RECV_PIN 11
+#define RECV_PIN 5
 #define LED_PIN  2
-#define BRIGHT_PIN A0
+#define BRIGHT_PIN A3
 #define BUTTON_PIN 8
 /********************************** FastLED variables ***********************************************/
-#define NUM_LEDS 25
+#define NUM_LEDS 55
 #define LED_TYPE WS2811
 #define COLOR_ORDER GRB
 /********************************** IR variables ***********************************************/
@@ -46,7 +72,7 @@ uint8_t speed_inc = 3; // speed incrementing
 /********************************** brightness variables ***********************************************/
 uint16_t analog_bright = 0; // val from analog brightness input
 uint16_t last_analog_bright = 0; // last brightness annlog read
-uint8_t  max_analog_diff = 20; // max diff before we accept the analog read input as a 'real' change
+uint8_t  max_analog_diff = 30; // max diff before we accept the analog read input as a 'real' change
 uint8_t brightness = 128; // LED brightness -> need two to save last brightness before turning off/on
 uint8_t actual_brightness = brightness; // the brightness that gets applied to the LED strip
 uint8_t bright_inc = 20; // incrementing of brightness
@@ -104,9 +130,11 @@ void loop() {
     }
 
     // read brightness and see if changed
-    // analog_bright = analogRead(BRIGHT_PIN);
-    // if (analog_bright - last_analog_bright < max_analog_diff || analog_bright - last_analog_bright > max_analog_diff) {
-    //     brightness += bright_inc;
+    // analog_bright = analogRead(A3);
+    // if ( abs(analog_bright - last_analog_bright) > max_analog_diff ) {
+    //     actual_brightness = map(analog_bright,0,1023,0,255);
+    //     brightness = actual_brightness;
+    //     last_analog_bright = analog_bright;
     // }
     
     // if led_speed has passed and IR is idle then update LEDs
@@ -199,8 +227,8 @@ void update_color_scheme(){
 void lamp_light_colors() {
 
     
-    if(lamp_light_number > 19){ lamp_light_number = 1; }
-    if(lamp_light_number < 1){ lamp_light_number = 19; }
+    if(lamp_light_number > 4){ lamp_light_number = 1; }
+    if(lamp_light_number < 1){ lamp_light_number = 4; }
 
     switch(lamp_light_number) {
         case 1:
@@ -216,66 +244,6 @@ void lamp_light_colors() {
             lamp_light(255, 214, 170);
             break;
         case 4:
-            // Halogen 
-            lamp_light(255, 241, 224);
-            break;
-        case 5:
-            // Carbon Arc 
-            lamp_light(255, 250, 244);
-            break;
-        case 6:
-            // High Noon Sun 
-            lamp_light(255, 255, 251);
-            break;
-        case 7:
-            // Direct Sunlight 
-           lamp_light( 255, 255, 25);
-            break;
-        case 8:
-            // Overcast Sky 
-            lamp_light(201, 226, 255);
-            break;
-        case 9:
-            // Clear Blue Sky 
-            lamp_light(64, 156, 255);
-            break;
-        case 10:
-            // Warm Fluorescent 
-            lamp_light(255, 244, 229);
-            break;
-        case 11:
-            // Standard Fluorescent 
-            lamp_light(244, 255, 250);
-            break;
-        case 12:
-            // Cool White Fluorescent 
-            lamp_light(212, 235, 255);
-            break;
-        case 13:
-            // Full Spectrum Fluorescent 
-            lamp_light(255, 244, 242);
-            break;
-        case 14:
-            // Grow Light Fluorescent 
-            lamp_light(255, 239, 247);
-            break;
-        case 15:
-            // Black Light Fluorescent 
-            lamp_light(167, 0, 255); 
-            break;
-        case 16:
-            // Mercury Vapor 
-            lamp_light(216, 247, 255);
-            break;
-        case 17:
-            // Sodium Vapor 
-            lamp_light(255, 209, 178);
-            break;
-        case 18:
-            // Metal Halide 
-            lamp_light(242, 252, 255);
-            break;
-        case 19:
             // High Pressure Sodium 
             lamp_light(255, 183, 76);
             break;
@@ -336,7 +304,7 @@ void read_reciever() {
         if(led_speed > max_led_speed) { led_speed = 3; }
         if(led_speed < 1) { led_speed = max_led_speed; }
 
-        if(true){
+        if(false){
             Serial.print("results.value: ");
             Serial.println(results.value);
             Serial.print("palette_number: ");
