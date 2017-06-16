@@ -29,12 +29,9 @@
 #include <platforms.h>
 #include <power_mgt.h>
 
-
 /********************************** pin variables ***********************************************/
 #define RECV_PIN 5
 #define LED_PIN  2
-#define BRIGHT_PIN A3
-#define BUTTON_PIN 8
 /********************************** FastLED variables ***********************************************/
 #define NUM_LEDS 55
 #define LED_TYPE WS2811
@@ -70,9 +67,6 @@ uint8_t lamp_light_number = 1; // which lamp color scheme
 uint16_t start_index = 0; // for color pattern incrementing
 uint8_t speed_inc = 3; // speed incrementing
 /********************************** brightness variables ***********************************************/
-uint16_t analog_bright = 0; // val from analog brightness input
-uint16_t last_analog_bright = 0; // last brightness annlog read
-uint8_t  max_analog_diff = 30; // max diff before we accept the analog read input as a 'real' change
 uint8_t brightness = 128; // LED brightness -> need two to save last brightness before turning off/on
 uint8_t actual_brightness = brightness; // the brightness that gets applied to the LED strip
 uint8_t bright_inc = 20; // incrementing of brightness
@@ -84,9 +78,6 @@ uint16_t power_delay = 3000; // power up delay
 
 /******************************************************************************************
 *   void setup
-*
-*
-*
 *******************************************************************************************/
 void setup()
 {
@@ -109,9 +100,6 @@ void setup()
 
 /*******************************************************************************************
 *   void loop
-*
-*
-*
 *******************************************************************************************/
 void loop() { 
 
@@ -120,22 +108,6 @@ void loop() {
 
     // get current run time
     current_time = millis();
-
-    // read button input and change color if pressed
-    int reading = digitalRead(BUTTON_PIN);
-    if (reading == HIGH && (current_time - last_bounce_time) > debounce_delay) {
-        last_bounce_time = current_time;
-        palette_number++;
-        update_color_scheme();
-    }
-
-    // read brightness and see if changed
-    // analog_bright = analogRead(A3);
-    // if ( abs(analog_bright - last_analog_bright) > max_analog_diff ) {
-    //     actual_brightness = map(analog_bright,0,1023,0,255);
-    //     brightness = actual_brightness;
-    //     last_analog_bright = analog_bright;
-    // }
     
     // if led_speed has passed and IR is idle then update LEDs
     if( (current_time - last_time > (max_led_speed - led_speed)) && irrecv.isIdle() ){
@@ -157,7 +129,6 @@ void loop() {
 *       fills the LED color array with the curent color palette
 *   param:
         uint8_t color_index - the starting index of the LED array
-*
 *******************************************************************************************/
 
 void fill_led_colors(uint16_t color_index){ 
@@ -254,9 +225,7 @@ void lamp_light_colors() {
 
 /*******************************************************************************************
 *   void read_reciever
-*
-*
-*
+*		decodes reciever results and adjauts variables based on IR input
 *******************************************************************************************/
 void read_reciever() {
 
@@ -327,9 +296,9 @@ void read_reciever() {
 
 /*******************************************************************************************
 *   void lamp_light
-*
-*
-*
+*		creates a color palette for FastLED
+*	params:
+*		red, green, blue uint8_t variable types for creating an CRGB object for palette creation
 *******************************************************************************************/
 void lamp_light(uint8_t red, uint8_t green, uint8_t blue){
 
@@ -342,4 +311,3 @@ void lamp_light(uint8_t red, uint8_t green, uint8_t blue){
         rgb, rgb, rgb, rgb
     );
 }
-
